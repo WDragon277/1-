@@ -1,0 +1,76 @@
+#include <Adafruit_NeoPixel.h>
+
+// 컨트롤 핀
+#define PIN            6
+
+// WS2812B 의 연결된 개수
+#define NUMPIXELS      10
+#define READ_BUFFER_SIZE 6
+
+
+// 만약 WS2811 를 사용할 경우 NEO_KHZ800 을 NEO_KHZ400 으로 변경해야 한다.
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+int R = 0, G = 0, B = 0, selectNum;
+char buffer[READ_BUFFER_SIZE]; 
+
+int readNumber();
+
+void setup() {
+  pixels.begin(); // This initializes the NeoPixel library.
+  Serial.begin(9600);
+}
+
+
+void loop() {
+
+  // 핀 번호 입력.
+  Serial.print("Select LED(0~");
+  Serial.print(NUMPIXELS - 1);
+  Serial.print(") : ");
+  // Serial 에 값이 들어올 때 까지 대기하는 동안 지속적으로 업데이트 해준다.
+  while(!Serial.available()) pixels.show();
+  // 값을 입력 받는다.
+  selectNum = readNumber();
+
+
+  Serial.print("R(0~255) : ");   
+  while(!Serial.available())  pixels.show();
+  R = readNumber();
+
+  Serial.print("G(0~255) : ");   
+  while(!Serial.available())   pixels.show();
+  G = readNumber();
+  
+
+  Serial.print("B(0~255) : ");   
+  while(!Serial.available())  pixels.show();
+  B = readNumber();
+
+ pixels.setPixelColor(selectNum, pixels.Color(R,G,B));
+ pixels.show();  
+}
+
+// String 으로 입력받은 숫자를 integer 형태로 변환하여 반환한다.
+int readNumber() 
+{
+  int index = 0, number = 0;
+  while(Serial.available())  
+  {
+      delay(5);
+      buffer[index++] = Serial.read();
+      buffer[index] = '\0';         
+      if(index + 1 == READ_BUFFER_SIZE) 
+      {
+        break;
+      }      
+  } 
+  Serial.flush(); 
+  number = atoi(buffer);  
+  Serial.println(number);
+  return number;
+}
+
+
+
+//출처: https://dev.re.kr/57 [Dev.re.kr]
